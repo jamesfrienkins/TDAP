@@ -1,11 +1,10 @@
 from subprocess import check_output as system
 from scanmap import transform as tr
-from os import system as cmd
 
 class functions:
-    transform = tr()
     disabledPrograms = {}
     disableCount = 0
+    transform = tr()
 
     def __init__(self):
         system("REG ADD HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v DisallowRun /t REG_DWORD /d 1 /f")
@@ -61,7 +60,7 @@ class functions:
 
         system(f'''REG ADD "HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout" /v "Scancode Map" /t REG_BINARY /d {hexCode} /f''')
     
-    def enableAllKeys(self):
+    def enableKeys(self):
         try:
             system('''REG DELETE "HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout" /v "Scancode Map" /f''')
         except:

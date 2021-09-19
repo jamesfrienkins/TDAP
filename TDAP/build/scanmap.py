@@ -2,7 +2,7 @@ from subprocess import check_output as system
 
 class transform:
     currentLocation = system('cd', shell = True).decode('utf-8').strip()
-    scanmapFile = open(f"{currentLocation}\\tdap\\scanmap.txt", "r")
+    scanmapFile = open(f"{currentLocation}\\TDAP\\build\\scanmap.txt", "r")
 
     scanmapMass = scanmapFile.readlines()
     scanmapDictionary = {}
@@ -21,7 +21,12 @@ class transform:
     def getHexValue(self, keyList = []):
         hexCode = "0000000000000000"
         
-        if keyList == []:
+        if keyList == ['ALL']:
+            keyList = self.scanmapKeys
+            keyList.remove("[OTHERKEY][RightShift]")
+            keyList.remove("[OTHERKEY][LeftShift]")
+            keyList.remove("[OTHERKEY][Backspace]")
+        elif keyList == []:
             print("Print key list. For exit print 'END'\nList of keys: ")
 
             while True:
@@ -47,4 +52,5 @@ class transform:
             hexCode += "0000" + str(value).strip()
         
         hexCode += "00000000"
+        print(len(self.scanmapKeys))
         return hexCode
