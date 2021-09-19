@@ -1,5 +1,4 @@
 import time
-import random
 import socket
 import threading
 from datetime import datetime
@@ -98,15 +97,10 @@ clnt.connect()
 
 
 time.sleep(1)
-clnt.send("Hello Mike! 1")
-time.sleep(2)
-clnt.send("Hello Mike! 2")
-time.sleep(2)
-clnt.send("Hello Mike! 3")
-time.sleep(2)
-clnt.send("Hello Mike! 4")
+clnt.send("Hello World!!")
+time.sleep(5)
+clnt.send("Hello Mike!")
 time.sleep(20)
 
 clnt.disconnect()
-
 clnt.close()
