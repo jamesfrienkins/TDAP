@@ -15,6 +15,8 @@ class newClient:
     PORT = 55000
     ADDR = (SERVER, PORT)
 
+    entryLog = []
+
     client.settimeout(0.25)
 
     clientIsConnected = False
@@ -25,26 +27,43 @@ class newClient:
 
         ADDR = (self.SERVER, self.PORT)
         self.ADDR = ADDR
+        
+        try:
+            self.log = open(f"log-client-{__SERVER__}:{__PORT__}.txt", 'a')
+        except:
+            self.log = open(f"log-client-{__SERVER__}:{__PORT__}.txt", 'r+')
 
+        self.entryLog = self.log.readlines()
+        self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [STARING...] Client starting on {self.SERVER}:{self.PORT}/n")
+        self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [STARING...] Client starting on {self.SERVER}:{self.PORT})
         print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [STARING...] Client starting on {self.SERVER}:{self.PORT}")
 
     def connect(self):
         try:
             self.client.connect(self.ADDR)
+            
+            self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Connected to {self.SERVER}:{self.PORT}.../n")
+            self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Connected to {self.SERVER}:{self.PORT}...")
             print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Connected to {self.SERVER}:{self.PORT}...")
 
             checkConnection = threading.Thread(target = self.__checkConnection__, args = (), daemon = True)
             self.clientIsConnected = True
             checkConnection.start()
         except:
+            self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Can't connect to {self.SERVER}:{self.PORT}.../n")
+            self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Can't connect to {self.SERVER}:{self.PORT}...")
             print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Can't connect to {self.SERVER}:{self.PORT}...")
 
     def disconnect(self):
         self.send(self.DISCONNECT_MESSAGE, msgKey=self.DISCONNECT_MESSAGE)
+        self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {self.ADDR} Disconnected by client./n")
+        self.entryLog(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {self.ADDR} Disconnected by client.")
         print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {self.ADDR} Disconnected by client.")
     
     def close(self):
         self.client.close()
+        self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CLOSING...]/n")
+        self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CLOSING...]")
         print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CLOSING...]")
 
     def send(self, msgValue, msgKey = "[TEXT]"):
@@ -52,6 +71,8 @@ class newClient:
             msg = msgKey + " --> " + msgValue
 
             if msgValue != self.CHECK_CONNECTION_MESSAGE:
+                self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] {msg}/n")
+                self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] {msg}")
                 print(f"[{datetime.now().strftime('''%H:%M:%S''')}] {msg}")
             message = msg.encode(self.FORMAT)
             msg_length = len(message)
@@ -64,6 +85,8 @@ class newClient:
             serverAnsw = self.client.recv(1024).decode(self.FORMAT)
 
             if serverAnsw != "NONE" and serverAnsw != self.CHECK_CONNECTION_MESSAGE:
+                self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] {serverAnsw}/n")
+                self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] {serverAnsw}")
                 print(f"[{datetime.now().strftime('''%H:%M:%S''')}] {serverAnsw}")
         
             return serverAnsw
@@ -75,6 +98,8 @@ class newClient:
                     self.send(msgValue = self.CHECK_CONNECTION_MESSAGE, msgKey = self.CHECK_CONNECTION_MESSAGE)
                 except:
                     self.clientIsConnected = False
+                    self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {self.ADDR} Server don't respond./n")
+                    self.entryLog(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {self.ADDR} Server don't respond."]
                     print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {self.ADDR} Server don't respond.")
                 print("YES")
             else:
@@ -83,8 +108,12 @@ class newClient:
                 try:
                     self.client.connect(self.ADDR)
                     self.clientIsConnected = True
+                    self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Connected to {self.SERVER}:{self.PORT}.../n")
+                    self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Connected to {self.SERVER}:{self.PORT}...")
                     print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Connected to {self.SERVER}:{self.PORT}...")
                 except:
+                    self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Can't connect to {self.SERVER}:{self.PORT}.../n")
+                    self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Can't connect to {self.SERVER}:{self.PORT}...")
                     print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING...] Can't connect to {self.SERVER}:{self.PORT}...")
 
 
