@@ -15,6 +15,7 @@ class newServer:
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind(ADDR)
 
+    entryLog = []
     clientList = []
     clientId = {}
 
@@ -45,12 +46,18 @@ class newServer:
                     elif msgKey == self.CHECK_CONNECTION_MESSAGE:
                         conn.send(str(self.CHECK_CONNECTION_MESSAGE).encode(self.FORMAT))
                     elif msgKey == self.TEXT_MESSAGE:
+                        self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [MESSAGE] {addr} {msgValue}/n")
+                        self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [MESSAGE] {addr} {msgValue}")
                         print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [MESSAGE] {addr} {msgValue}")
                         conn.send("NONE".encode(self.FORMAT))
                     else:
+                        self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [MESSAGE] {addr} {msgKey} {msgValue}/n")
+                        self.entryLog(f"[{datetime.now().strftime('''%H:%M:%S''')}] [MESSAGE] {addr} {msgKey} {msgValue}")
                         print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [MESSAGE] {addr} {msgKey} {msgValue}")
                         conn.send("NONE".encode(self.FORMAT))
         except:
+            self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {addr} Client don't respond./n")
+            self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {addr} Client don't respond.")
             print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {addr} Client don't respond.")
         try:
             conn.close()
@@ -61,12 +68,18 @@ class newServer:
             self.clientId[addr] = False
             self.clientList.remove(addr)
             self.activeClients -= 1
+            self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {addr} Disconnected by client. Active connections = {self.activeClients}/n")
+            self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {addr} Disconnected by client. Active connections = {self.activeClients}")
             print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {addr} Disconnected by client. Active connections = {self.activeClients}")
             
     def __start__(self):
         try:
-            print("[STARTING...] Server is starting...")
+            self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [STARTING...] Server is starting.../n")
+            self.entryLog(f"[{datetime.now().strftime('''%H:%M:%S''')}] [STARTING...] Server is starting...")
+            print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [STARTING...] Server is starting...")
             self.server.listen()
+            self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [LISTENING] Server is listening on {self.SERVER}:{self.PORT}/n")
+            self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [LISTENING] Server is listening on {self.SERVER}:{self.PORT}")
             print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [LISTENING] Server is listening on {self.SERVER}:{self.PORT}")
 
             while self.serverIsRunning:
@@ -78,12 +91,22 @@ class newServer:
 
                 
                 self.activeClients += 1
+                self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING] {addr} Active connections = {self.activeClients}/n")
+                self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING] {addr} Active connections = {self.activeClients}")
                 print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CONNECTING] {addr} Active connections = {self.activeClients}")
         except:
             pass
 
     def start(self):
         self.serverIsRunning = True
+
+        try:
+            self.log = open(f"log-server-{self.SERVER}:{self.PORT}.txt", 'a')
+        except:
+            self.log = open(f"log-server-{self.SERVER}:{self.PORT}.txt", 'r+')
+
+        self.entryLog = self.log.readlines()
+
 
         startServer = threading.Thread(target = self.__start__, args = (), daemon = True)
         startServer.start()
@@ -93,12 +116,16 @@ class newServer:
             if self.clientId.get(clientIP) == True:
                 self.clientId[clientIP] = False
                 self.activeClients -= 1
+                self.log.writeline((f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {clientIP} Disconnected by server. Active connections = {self.activeClients}/n")
+                self.entryLog.append((f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {clientIP} Disconnected by server. Active connections = {self.activeClients}")
                 print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [DISCONNECTED] {clientIP} Disconnected by server. Active connections = {self.activeClients}")
                 time.sleep(1)
 
         self.clientList = []
 
         self.server.close()
+        self.log.writeline(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CLOSING...]/n")
+        self.entryLog.append(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CLOSING...]")
         print(f"[{datetime.now().strftime('''%H:%M:%S''')}] [CLOSING...]")
 
 srv = newServer()
